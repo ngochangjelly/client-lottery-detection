@@ -1,5 +1,5 @@
 import axios from 'axios'
-const API_URL = "http://localhost:3000"
+const API_URL = "https://lottery-image-server.herokuapp.com"
 const headers = {
   "Content-Type": "application/json"
 }
