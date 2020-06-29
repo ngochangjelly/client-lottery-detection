@@ -1,26 +1,11 @@
 <template>
   <v-container class="container">
-    <!-- <div>
-      lottery detection
-    </div>
-    <span v-if="!imageData" class="placeholder">
-      Choose an Image
-    </span>
+    <h1>{{ serieNumber }}</h1>
+    <div id="image">imae</div>
     <div
       class="base-image-input"
       :style="{ 'background-image': `url(${imageData})` }"
-      @click="chooseImage"
-    >
-      <v-file-input
-        class="file-input"
-        ref="fileInput"
-        type="file"
-        @input="onSelectFile"
-      ></v-file-input>
-    </div> -->
-    <div
-      class="base-image-input"
-      :style="{ 'background-image': `url(${imageData})` }"
+      id="preview"
       @click="chooseImage"
     >
       <span v-if="!imageData" class="placeholder">
@@ -31,23 +16,22 @@
         ref="fileInput"
         type="file"
         @input="onSelectFile"
+        accept="image/*;capture=camera"
       />
-      <!-- <v-file-input
-        class="file-input"
-        ref="fileInput"
-        type="file"
-        @input="onSelectFile"
-      ></v-file-input> -->
     </div>
   </v-container>
 </template>
 
 <script>
+// import { imageDetection } from '../script/image-detection';
+// import extractSerieNumber from '../script/extract-serie-number';
+import { sendImage } from '../script/service';
+
 export default {
   name: 'HelloWorld',
-
   data: () => ({
     imageData: null,
+    serieNumber: 'lottery serie number',
   }),
   methods: {
     onSelectFile() {
@@ -55,9 +39,13 @@ export default {
       const files = input.files;
       if (files && files[0]) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = async (e) => {
           this.imageData = e.target.result;
-          console.log('reader.onload -> e.target.result', e.target.result);
+          const serieNumber = await sendImage(e.target.result);
+          console.log('reader.onload -> serieNumber', serieNumber);
+          this.serieNumber = serieNumber
+            ? serieNumber.data
+            : "Sorry we can't detect the image";
         };
         reader.readAsDataURL(files[0]);
         this.$emit('input', files[0]);
@@ -82,16 +70,19 @@ export default {
   }
   .base-image-input {
     display: block;
-    width: 200px;
-    height: 200px;
+    width: 600px;
+    height: 300px;
+    border-radius: 8px;
     cursor: pointer;
     background-size: cover;
     background-position: center center;
+    background-size: contain;
   }
   .placeholder {
     background: #f0f0f0;
-    width: 100%;
-    height: 100%;
+    width: 600px;
+    height: 300px;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
