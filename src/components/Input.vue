@@ -1,5 +1,5 @@
 <template>
-  <v-container class="container">
+  <v-container>
     <h1>{{ serieNumber }}</h1>
     <div id="image">imae</div>
     <div
@@ -8,6 +8,7 @@
       id="preview"
       @click="chooseImage"
     >
+      <span class="scanner"></span>
       <span v-if="!imageData" class="placeholder">
         Choose an Image
       </span>
@@ -23,8 +24,6 @@
 </template>
 
 <script>
-// import { imageDetection } from '../script/image-detection';
-// import extractSerieNumber from '../script/extract-serie-number';
 import { sendImage } from '../script/service';
 
 export default {
@@ -62,36 +61,63 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 600px;
   align-items: center;
   height: 100vh;
-  width: 100vw;
   .file-input {
     width: 50%;
   }
   .base-image-input {
-    display: block;
-    width: 600px;
+    display: flex;
+    justify-content: center;
     height: 300px;
     border-radius: 8px;
     cursor: pointer;
     background-size: cover;
-    background-position: center center;
+    background-position: center;
     background-size: contain;
+    flex-direction: column;
+    align-content: center;
+    .scanner {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 20px;
+      background-color: rgba(45, 183, 183, 0.54);
+      z-index: 1;
+      transform: translateY(135%);
+      animation: move 0.7s cubic-bezier(0.15, 0.44, 0.76, 0.64);
+      animation-iteration-count: infinite;
+    }
+    .placeholder {
+      background: #f0f0f0;
+      width: 100%;
+      height: 300px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+      font-size: 18px;
+      font-family: Helvetica;
+      backface-visibility: hidden;
+    }
+    .placeholder:hover {
+      background: #e0e0e0;
+    }
   }
-  .placeholder {
-    background: #f0f0f0;
-    width: 600px;
-    height: 300px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #333;
-    font-size: 18px;
-    font-family: Helvetica;
+}
+@keyframes move {
+  0%,
+  100% {
+    transform: translateY(135%);
   }
-  .placeholder:hover {
-    background: #e0e0e0;
+  50% {
+    transform: translateY(0%);
+  }
+  75% {
+    transform: translateY(272%);
   }
 }
 </style>
