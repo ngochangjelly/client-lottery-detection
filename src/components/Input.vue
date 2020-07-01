@@ -1,19 +1,19 @@
 <template>
   <v-container>
-    <h1>{{ serieNumber }}</h1>
-    <div id="image">imae</div>
+    <h3 class="title">{{ serieNumber }}</h3>
     <div
       class="base-image-input"
       :style="{ 'background-image': `url(${imageData})` }"
       id="preview"
       @click="chooseImage"
     >
-      <span class="scanner"></span>
+      <span v-if="analyzing" class="scanner"></span>
       <span v-if="!imageData" class="placeholder">
-        Choose an Image
+        Upload image
       </span>
       <input
         class="file-input"
+        id="upload-photo"
         ref="fileInput"
         type="file"
         @input="onSelectFile"
@@ -31,7 +31,13 @@ export default {
   data: () => ({
     imageData: null,
     serieNumber: 'lottery serie number',
+    analyzing: false,
   }),
+  // computed: {
+  //   ouputSerieNumber: function() {
+  //     return this.serieNumber.toLocaleUpperCase();
+  //   },
+  // }
   methods: {
     onSelectFile() {
       const input = this.$refs.fileInput;
@@ -39,12 +45,19 @@ export default {
       if (files && files[0]) {
         const reader = new FileReader();
         reader.onload = async (e) => {
+          this.analyzing = true;
           this.imageData = e.target.result;
+          this.serieNumber = 'analyzing';
           const serieNumber = await sendImage(e.target.result);
           console.log('reader.onload -> serieNumber', serieNumber);
-          this.serieNumber = serieNumber
-            ? serieNumber.data
-            : "Sorry we can't detect the image";
+          const serieNumberRegex = /[0-9]*6/;
+          const validSerie = serieNumberRegex.test(serieNumber);
+          if (serieNumber && validSerie) {
+            this.serieNumber = serieNumberRegex.match(serieNumber)[0];
+          } else {
+            this.serieNumber = "Sorry we can't detect the image";
+          }
+          this.analyzing = false;
         };
         reader.readAsDataURL(files[0]);
         this.$emit('input', files[0]);
@@ -64,8 +77,12 @@ export default {
   width: 600px;
   align-items: center;
   height: 100vh;
+  .title {
+    margin-bottom: 20px;
+  }
   .file-input {
     width: 50%;
+    opacity: 0;
   }
   .base-image-input {
     display: flex;
@@ -78,15 +95,16 @@ export default {
     background-size: contain;
     flex-direction: column;
     align-content: center;
+    position: relative;
     .scanner {
       position: absolute;
       left: 0;
-      top: 0;
+      top: 25%;
       width: 100%;
-      height: 20px;
+      height: 50px;
       background-color: rgba(45, 183, 183, 0.54);
       z-index: 1;
-      transform: translateY(135%);
+      transform: translateY(4);
       animation: move 0.7s cubic-bezier(0.15, 0.44, 0.76, 0.64);
       animation-iteration-count: infinite;
     }
