@@ -8,9 +8,9 @@
       @click="chooseImage"
     >
       <span v-if="analyzing" class="scanner"></span>
-      <span v-if="!imageData" class="placeholder">
-        Upload image
-      </span>
+      <span v-if="!imageData" class="placeholder"
+        ><camera-icon></camera-icon
+      ></span>
       <input
         class="file-input"
         id="upload-photo"
@@ -33,11 +33,6 @@ export default {
     serieNumber: 'lottery serie number',
     analyzing: false,
   }),
-  // computed: {
-  //   ouputSerieNumber: function() {
-  //     return this.serieNumber.toLocaleUpperCase();
-  //   },
-  // }
   methods: {
     onSelectFile() {
       const input = this.$refs.fileInput;
@@ -49,11 +44,15 @@ export default {
           this.imageData = e.target.result;
           this.serieNumber = 'analyzing';
           const serieNumber = await sendImage(e.target.result);
-          console.log('reader.onload -> serieNumber', serieNumber);
+          const tempSerie = serieNumber.data;
+
           const serieNumberRegex = /[0-9]*6/;
-          const validSerie = serieNumberRegex.test(serieNumber);
-          if (serieNumber && validSerie) {
-            this.serieNumber = serieNumberRegex.match(serieNumber)[0];
+          if (!tempSerie) {
+            this.analyzing = false;
+            return;
+          }
+          if (serieNumberRegex.test(tempSerie)) {
+            this.serieNumber = serieNumberRegex.exec(serieNumber.data)[0];
           } else {
             this.serieNumber = "Sorry we can't detect the image";
           }
@@ -96,13 +95,17 @@ export default {
     flex-direction: column;
     align-content: center;
     position: relative;
+    .camera-plus-icon {
+      position: absolute;
+      color: grey;
+    }
     .scanner {
       position: absolute;
       left: 0;
       top: 25%;
       width: 100%;
       height: 50px;
-      background-color: rgba(45, 183, 183, 0.54);
+      background-color: rgba(255, 84, 135, 0.54);
       z-index: 1;
       transform: translateY(4);
       animation: move 0.7s cubic-bezier(0.15, 0.44, 0.76, 0.64);
