@@ -7,11 +7,12 @@
       id="preview"
       @click="chooseImage"
     >
-      <span v-if="analyzing" class="scanner"></span>
-      <span v-if="!imageData" class="placeholder"
-        ><camera-icon></camera-icon
-      ></span>
+      <span role="icon" v-if="analyzing" class="scanner"></span>
+      <span role="icon" v-if="!imageData" class="placeholder">
+        <camera-icon></camera-icon>
+      </span>
       <input
+        :disabled="analyzing"
         class="file-input"
         id="upload-photo"
         ref="fileInput"
@@ -24,14 +25,14 @@
 </template>
 
 <script>
-import { sendImage } from '../script/service';
+import { sendImage } from "../script/service";
 
 export default {
-  name: 'HelloWorld',
+  name: "HelloWorld",
   data: () => ({
     imageData: null,
-    serieNumber: 'lottery serie number',
-    analyzing: false,
+    serieNumber: "lottery serie number",
+    analyzing: false
   }),
   methods: {
     onSelectFile() {
@@ -39,10 +40,10 @@ export default {
       const files = input.files;
       if (files && files[0]) {
         const reader = new FileReader();
-        reader.onload = async (e) => {
+        reader.onload = async e => {
           this.analyzing = true;
           this.imageData = e.target.result;
-          this.serieNumber = 'analyzing';
+          this.serieNumber = "analyzing";
           const serieNumber = await sendImage(e.target.result);
           const tempSerie = serieNumber.data;
 
@@ -59,13 +60,14 @@ export default {
           this.analyzing = false;
         };
         reader.readAsDataURL(files[0]);
-        this.$emit('input', files[0]);
+        this.$emit("input", files[0]);
+        this.$refs.fileInput.value = "";
       }
     },
     chooseImage() {
       this.$refs.fileInput.click();
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss">
