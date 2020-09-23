@@ -4,7 +4,6 @@ import vuetify from './plugins/vuetify';
 import CameraIcon from 'vue-material-design-icons/CameraPlus.vue';
 
 Vue.component('camera-icon', CameraIcon);
-Vue.config.productionTip = false
 Vue.use(vuetify)
 
 new Vue({

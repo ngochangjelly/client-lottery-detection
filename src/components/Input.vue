@@ -25,49 +25,60 @@
 </template>
 
 <script>
-import { sendImage } from "../script/service";
+import { sendImage } from '../script/service';
 
 export default {
-  name: "HelloWorld",
+  name: 'HelloWorld',
   data: () => ({
     imageData: null,
-    serieNumber: "lottery serie number",
-    analyzing: false
+    serieNumber: 'aaa lottery serie number',
+    analyzing: false,
   }),
   methods: {
+    reset() {
+      console.log(this.refs.fileInput);
+      this.$refs.fileInput.value = null;
+    },
     onSelectFile() {
       const input = this.$refs.fileInput;
       const files = input.files;
       if (files && files[0]) {
         const reader = new FileReader();
-        reader.onload = async e => {
+        reader.onload = async (e) => {
           this.analyzing = true;
           this.imageData = e.target.result;
-          this.serieNumber = "analyzing";
-          const serieNumber = await sendImage(e.target.result);
-          const tempSerie = serieNumber.data;
+          this.serieNumber = 'analyzing';
+          try {
+            const serieNumber = await sendImage(e.target.result);
+            console.log('aaaaaaaaaaaaaaaa ', serieNumber);
+            const tempSerie = serieNumber.data;
 
-          const serieNumberRegex = /[0-9]*6/;
-          if (!tempSerie) {
+            const serieNumberRegex = /[0-9]*6/;
+            if (!tempSerie) {
+              this.analyzing = false;
+              return;
+            }
+            if (serieNumberRegex.test(tempSerie)) {
+              this.serieNumber = serieNumberRegex.exec(serieNumber.data)[0];
+            } else {
+              this.serieNumber = "Sorry we can't detect the image";
+              this.reset();
+            }
             this.analyzing = false;
-            return;
+          } catch (err) {
+            this.analyzing = false;
+            this.serieNumber = 'Error detecting image';
+            this.reset();
           }
-          if (serieNumberRegex.test(tempSerie)) {
-            this.serieNumber = serieNumberRegex.exec(serieNumber.data)[0];
-          } else {
-            this.serieNumber = "Sorry we can't detect the image";
-          }
-          this.analyzing = false;
         };
         reader.readAsDataURL(files[0]);
-        this.$emit("input", files[0]);
-        this.$refs.fileInput.value = "";
+        this.$emit('input', files[0]);
       }
     },
     chooseImage() {
       this.$refs.fileInput.click();
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss">
