@@ -1,6 +1,42 @@
 <template>
   <v-container>
-    <h3 class="title">{{ serieNumber }}</h3>
+    <p v-if="fullProvince" class="description">
+      <span class="label">XSTKT </span>{{ fullProvince }}
+    </p>
+    <v-skeleton-loader
+      v-if="analyzing"
+      class="loader-indicator"
+      width="50%"
+      type="text"
+    />
+    <p v-if="date" class="description">
+      <span class="label">Phát hành ngày: </span>{{ date }}
+    </p>
+    <v-skeleton-loader
+      v-if="analyzing"
+      class="loader-indicator"
+      width="50%"
+      type="text"
+    />
+    <p v-if="serieNumber" class="description">
+      <span class="label">Số serie: </span>{{ serieNumber }}
+    </p>
+    <v-skeleton-loader
+      v-if="analyzing"
+      class="loader-indicator"
+      width="50%"
+      type="text"
+    />
+    <p v-if="message" class="description">
+      <span class="label">Kết quả: </span>{{ message }}
+    </p>
+    <v-skeleton-loader
+      v-if="analyzing"
+      class="loader-indicator"
+      width="50%"
+      type="text"
+    />
+    <div>{{ action }}</div>
     <div
       class="base-image-input"
       :style="{ 'background-image': `url(${imageData})` }"
@@ -26,18 +62,26 @@
 
 <script>
 import { sendImage } from '../script/service';
+import constants from '../constants';
 
 export default {
   name: 'HelloWorld',
   data: () => ({
     imageData: null,
-    serieNumber: 'aaa lottery serie number',
+    serieNumber: null,
     analyzing: false,
+    message: '',
+    fullProvince: null,
+    date: null,
+    action: constants.message.upload,
   }),
   methods: {
     reset() {
-      console.log(this.refs.fileInput);
-      this.$refs.fileInput.value = null;
+      this.serieNumber = null;
+      this.message = null;
+      this.date = null;
+      this.fullProvince = null;
+      this.$refs.fileInput.value = '';
     },
     onSelectFile() {
       const input = this.$refs.fileInput;
@@ -47,28 +91,29 @@ export default {
         reader.onload = async (e) => {
           this.analyzing = true;
           this.imageData = e.target.result;
-          this.serieNumber = 'analyzing';
+          this.action = constants.message.analyzing;
           try {
-            const serieNumber = await sendImage(e.target.result);
-            console.log('aaaaaaaaaaaaaaaa ', serieNumber);
-            const tempSerie = serieNumber.data;
-
-            const serieNumberRegex = /[0-9]*6/;
-            if (!tempSerie) {
-              this.analyzing = false;
-              return;
-            }
-            if (serieNumberRegex.test(tempSerie)) {
-              this.serieNumber = serieNumberRegex.exec(serieNumber.data)[0];
+            const response = await sendImage(e.target.result);
+            const { message, serie, date, fullProvince } = response.data;
+            if (serie) {
+              this.serieNumber = serie;
             } else {
-              this.serieNumber = "Sorry we can't detect the image";
-              this.reset();
+              this.serieNumber = constants.message.cantProcess;
+            }
+            if (message) {
+              this.message = message;
+            }
+            if (date) {
+              this.date = date;
+            }
+            if (fullProvince) {
+              this.fullProvince = fullProvince;
             }
             this.analyzing = false;
+            this.action = constants.message.upload;
           } catch (err) {
             this.analyzing = false;
-            this.serieNumber = 'Error detecting image';
-            this.reset();
+            this.serieNumber = constants.message.errorProcess;
           }
         };
         reader.readAsDataURL(files[0]);
@@ -76,6 +121,7 @@ export default {
       }
     },
     chooseImage() {
+      this.reset();
       this.$refs.fileInput.click();
     },
   },
@@ -83,15 +129,30 @@ export default {
 </script>
 <style lang="scss">
 .container {
+  .loader-indicator {
+    width: 80%;
+    display: flex;
+    justify-items: flex-start;
+  }
+  .label {
+    font-weight: bold;
+    text-align: left;
+  }
+  .description {
+    text-align: left;
+    width: 80%;
+  }
+  .v-skeleton-loader {
+    margin-left: -50%;
+    margin-bottom: 16px;
+    height: 16px;
+  }
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 600px;
   align-items: center;
   height: 100vh;
-  .title {
-    margin-bottom: 20px;
-  }
   .file-input {
     width: 50%;
     opacity: 0;
