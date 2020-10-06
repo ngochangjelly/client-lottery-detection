@@ -2,7 +2,8 @@
 
 - Demo:
   - Youtube: https://youtu.be/-4aEPRcZB0U
-  - GIF: ![](demo-lottery-detection.gif)
+  - GIF: 
+  ![](demo-gif.gif)
 
 ## About this project
 
